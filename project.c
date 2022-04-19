@@ -85,7 +85,124 @@ int instruction_decode(unsigned op,struct_controls *controls)
     Else return 0
     */
 
+   // based on opcode changes values in control
+   switch(op)
+   {
+       // r-type (add, sub, and, or, set less than, set less than unsigned)
+       case 0:
+            controls->RegDst = 1;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 7;
+            controls->MemWrite = 0;
+            controls->ALUSrc = 0;
+            controls-> RegWrite = 1;
+            break;
 
+        // jump
+        case 2:
+            controls->RegDst = 0;
+            controls->Jump = 1;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 0;
+            controls->MemWrite = 0;
+            controls->ALUSrc = 0;
+            controls-> RegWrite = 0;
+            break;
+        // beq
+        case 4:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 1;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 1;
+            controls->MemWrite = 0;
+            controls->ALUSrc = 0;
+            controls-> RegWrite = 0;
+            break;
+        // addi
+        case 8:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 0;
+            controls->MemWrite = 0;
+            controls->ALUSrc = 1;
+            controls-> RegWrite = 1;
+            break;
+        // slti
+        case 10:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 2;
+            controls->MemWrite = 0; 
+            controls->ALUSrc = 1;
+            controls-> RegWrite = 1;
+            break;
+        // slti unsigned
+        case 11:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 3;
+            controls->MemWrite = 0; 
+            controls->ALUSrc = 1;
+            controls-> RegWrite = 1;
+            break;
+        // lui
+        case 15:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 6;
+            controls->MemWrite = 0;
+            controls->ALUSrc = 1;
+            controls-> RegWrite = 1;
+            break;
+        // lw
+        case 35:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 1;
+            controls->MemtoReg = 1;
+            controls->ALUOp = 0;
+            controls->MemWrite = 0;
+            controls->ALUSrc = 1;
+            controls-> RegWrite = 1;
+            break;
+
+        // sw
+        case 43:
+            controls->RegDst = 0;
+            controls->Jump = 0;
+            controls->Branch = 0;
+            controls->MemRead = 0;
+            controls->MemtoReg = 0;
+            controls->ALUOp = 0;
+            controls->MemWrite = 1;
+            controls->ALUSrc = 1;
+            controls-> RegWrite =0; 
+            break;
+
+        default:
+            return 1;
+   }
+    return 0;	
 }
 
 /* Read Register */
