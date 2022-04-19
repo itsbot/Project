@@ -128,7 +128,41 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
     Call ALU
     switch case (ALUOp)
     */
-
+   switch (ALUOp) {
+       case 0x0: // add / don't care
+       case 0x1: // sub
+       case 0x2: // set <
+       case 0x3: // set < unsigned
+       case 0x4: // and
+       case 0x5: // or
+       case 0x6: // shift extended_value L 16 bits
+            break;
+       case 0x7: // R-type
+            switch (funct) {
+                case 0x20: // add
+                    ALUOp = 0x0;
+                    break;
+                case 0x2a: // slt S
+                    ALUOp = 0x2;
+                    break;
+                case 0x2b: // slt U
+                    ALUOp = 0x3;
+                    break;
+                case 0x24: // and
+                    ALUOp = 0x4;
+                    break;
+                case 0x25: // or
+                    ALUOp = 0x5;
+                    break;
+                default:
+                    return 1;
+            }
+        break;
+        default:
+            return 1;
+   }
+   ALU(data1, data2, ALUOp, ALUresult, Zero);
+   return 0;
 }
 
 /* Read / Write Memory */
