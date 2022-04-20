@@ -19,22 +19,70 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
     110
     111
     */
+	
+    switch((int)ALUControl){
+        //Z = A+B
+        case 0:
+            *ALUresult = A + B;
+            break;
+        //Z = A-B
+        case 1:
+            *ALUresult = A - B;
+            break;
+        //If A<B, Z = 1, otherwise Z = 0
+        case 2:
+            if((signed) A < (signed) B)
+                *ALUresult = 1;
+            else
+                *ALUresult = 0;
+            break;
+        //If A<B, Z = 1, otherwise Z = 0 UNSIGNED
+        case 3:
+            if(A < B)
+                *ALUresult = 1;
+            else
+                *ALUresult = 0;
+            break;
+        //Z = A AND B
+        case 4:
+            *ALUresult = A & B;
+            break;
+        //Z = A OR B
+        case 5:
+            *ALUresult = A | B;
+            break;
+        //Shift left B by 16 bits
+        case 6:
+            *ALUresult = B << 16;   
+            break;
+        //Z = NOT A
+        case 7:
+            *ALUresult = ~A;
+            break;
+    }
+    
+    //Check to see if the result is zero
+    if(*ALUresult == 0)
+        *Zero = 1;
+    else
+        *Zero = 0;
 
 }
 
 /* instruction fetch */
 /* 10 Points */
 int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
-{
-    /*
-    PC input is address from Memory (PC >> 2)
-    check word alignment (Start of mem address must be divisible by 4)
-    Assign address to instruction
-    
-    Return 1 for halt conditions (ProjectGuideline 2.4)
-    Else, return 0
-    */
-    
+{    
+	//PC input is address from Memory (PC >> 2)
+	unsigned i = PC >> 2;
+
+	//  check word alignment (Start of mem address must be divisible by 4)
+	if(PC % 4 != 0)
+		return 1;
+
+	// Get instruction from Memory then return 0;  Assign address to instruction
+	*instruction = Mem[i];
+	return 0;  
 }
 
 
@@ -42,20 +90,15 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 /* 10 Points */
 void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsigned *r2, unsigned *r3, unsigned *funct, unsigned *offset, unsigned *jsec)
 {
-    /*
-    Split 32 bits into 8 bit segments (Use hex assignments then bitmask)
-    use temp holders for assignments then assign to registers 
-
-    op,	// instruction [31-26]
-	r1,	// instruction [25-21]
-	r2,	// instruction [20-16]
-	r3,	// instruction [15-11]
-	funct,	// instruction [5-0]
-	offset,	// instruction [15-0]
-	jsec;	// instruction [25-0]
-
-    */
-
+   // Split 32 bits into 8 bit segments (Use hex assignments then bitmask)
+   // use temp holders for assignments then assign to registers 
+	*op = instruction >> 26;
+	*r1 = (instruction & (0b11111 << 20)) >> 21;
+	*r2 = (instruction & (0b11111 << 15)) >> 16;
+	*r3 = (instruction & (0b11111 << 10)) >> 11;
+	*funct = instruction & (0b111111);
+	*offset = instruction & (0b1111111111111111);
+	*jsec = instruction & (0b11111111111111111111111111);
 }
 
 
