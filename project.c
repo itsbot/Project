@@ -1,6 +1,9 @@
 /*
 	CDA 3103 Project
 	Dick Dela Cruz
+	Daniela Ostos
+	Patrick Iannini
+	Khiem Bui
 */
 
 #include "spimcore.h"
