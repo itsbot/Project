@@ -69,7 +69,7 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
             break;
     }
     
-    //Check to see if the result is zero
+    // Check to see if the result is zero
     if(*ALUresult == 0)
         *Zero = 1;
     else
@@ -84,7 +84,7 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 	//PC input is address from Memory (PC >> 2)
 	unsigned i = PC >> 2;
 
-	//  check word alignment (Start of mem address must be divisible by 4)
+	// check word alignment (Start of mem address must be divisible by 4)
 	if(PC % 4 != 0)
 		return 1;
 
@@ -100,13 +100,15 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 {
    // Split 32 bits into 8 bit segments (Use hex assignments then bitmask)
    // use temp holders for assignments then assign to registers 
+   
 	*op = instruction >> 26;
-	*r1 = (instruction & (0b11111 << 20)) >> 21;
+    *r1 = (instruction & 0x03e00000) >> 21;
 	*r2 = (instruction & (0b11111 << 15)) >> 16;
 	*r3 = (instruction & (0b11111 << 10)) >> 11;
 	*funct = instruction & (0b111111);
 	*offset = instruction & (0b1111111111111111);
 	*jsec = instruction & (0b11111111111111111111111111);
+
 }
 
 
@@ -153,27 +155,27 @@ int instruction_decode(unsigned op,struct_controls *controls)
             break;
 
         // jump
-        case 2:
-            controls->RegDst = 0;
+        case 2: 
+            controls->RegDst = 2; 
             controls->Jump = 1;
-            controls->Branch = 0;
+            controls->Branch = 2; 
             controls->MemRead = 0;
-            controls->MemtoReg = 0;
+            controls->MemtoReg = 2; 
             controls->ALUOp = 0;
             controls->MemWrite = 0;
-            controls->ALUSrc = 0;
+            controls->ALUSrc = 2; 
             controls-> RegWrite = 0;
             break;
         // beq
-        case 4:
-            controls->RegDst = 0;
+        case 4: 
+            controls->RegDst = 2; 
             controls->Jump = 0;
             controls->Branch = 1;
             controls->MemRead = 0;
-            controls->MemtoReg = 0;
-            controls->ALUOp = 1;
+            controls->MemtoReg = 2; 
+            controls->ALUOp = 1; 
             controls->MemWrite = 0;
-            controls->ALUSrc = 0;
+            controls->ALUSrc = 2; 
             controls-> RegWrite = 0;
             break;
         // addi
@@ -298,6 +300,10 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
     switch case (ALUOp)
     Break down case by case, for r-type check funct then reassign ALUOp per case
     */
+	if(ALUSrc == 1){
+		data2 = extended_value;
+	}
+
    switch (ALUOp) {
        case 0x0: // add / don't care
        case 0x1: // sub
@@ -309,19 +315,21 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
             break;
        case 0x7: // R-type
             switch (funct) {
-                case 0x20: // add
+                case 0x20: // add 32
                     ALUOp = 0x0;
                     break;
-                case 0x2a: // slt S
+//                case 0x22: // sub 22
+//                    ALUOp = 0x1;
+                case 0x2a: // slt S 42
                     ALUOp = 0x2;
                     break;
-                case 0x2b: // slt U
+                case 0x2b: // slt U 43
                     ALUOp = 0x3;
                     break;
-                case 0x24: // and
+                case 0x24: // and 36
                     ALUOp = 0x4;
                     break;
-                case 0x25: // or
+                case 0x25: // or 37
                     ALUOp = 0x5;
                     break;
                 default:
@@ -343,6 +351,7 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
     Check for halt conditions
 
     */
+   
     if (MemRead == 1) {
         if (ALUresult % 4 == 0) {
             *memdata = Mem[ALUresult >> 2];
@@ -369,6 +378,7 @@ void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,
     Check if Writing, then check register dest
     write memdata or ALUresult to registers
     */
+   
     if (RegWrite == 1) {
         if (MemtoReg == 1) {
             if (RegDst == 0 ) {
@@ -403,7 +413,7 @@ void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char 
     }
     // Jump
     if (Jump == 1) {
-        *PC = (jsec << 2) | (*PC & 0xf0000000);
+        *PC = (*PC & 0xf0000000) | (jsec << 2);
     } 
 }
 
