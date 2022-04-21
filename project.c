@@ -1,3 +1,8 @@
+/*
+	CDA 3103 Project
+	Dick Dela Cruz
+*/
+
 #include "spimcore.h"
 
 
